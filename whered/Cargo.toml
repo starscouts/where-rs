@@ -1,0 +1,10 @@
+[package]
+name = "whered"
+version = "1.2.0"
+edition = "2021"
+description = "A small Rust server for the WHRD/UDP protocol, to access a list of logged in users on multiple systems at once."
+authors = ["Starscouts", "ryze132"]
+
+[dependencies]
+whrd = { path = "../whrd" }
+clap = { version = "4.5.3", features = ["derive"] }

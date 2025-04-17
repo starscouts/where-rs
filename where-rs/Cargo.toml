@@ -1,0 +1,17 @@
+[package]
+name = "where-rs"
+version = "1.2.0"
+edition = "2021"
+description = "A small Rust client for the WHRD/UDP protocol, to access a list of logged in users on multiple systems at once."
+authors = ["Starscouts", "ryze132"]
+
+[[bin]]
+name = "where"
+path = "src/main.rs"
+
+[dependencies]
+whrd = { path = "../whrd" }
+chrono = "0.4.35"
+toml = "0.8.12"
+serde = { version = "1.0.197", features = ["derive"] }
+clap = { version = "4.5.3", features = ["derive"] }

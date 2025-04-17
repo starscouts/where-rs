@@ -1,0 +1,54 @@
+name: Build where
+
+on:
+  push:
+    branches: [ mane ]
+  pull_request:
+    branches: [ mane ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+        profile: [ dev, release ]
+
+    env:
+      BUILD_NAME: ${{ matrix.profile == 'dev' && 'debug' || matrix.profile }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: cargo build --all --profile ${{ matrix.profile }}
+    - name: Check
+      run: cargo clippy --profile ${{ matrix.profile }} -- -D warnings
+    - name: Test message exchange
+      working-directory: target/${{ env.BUILD_NAME }}
+      run: |
+        touch ~/.config/where.toml
+        echo '[global]' >> ~/.config/where.toml
+        echo '[[server]]' >> ~/.config/where.toml
+        echo 'endpoint="127.0.0.1:5000"' >> ~/.config/where.toml
+
+        ./whered -l 127.0.0.1:5000 &
+
+        i=0
+        while [ ! $(pgrep whered) ] && [ $i -lt 10 ]
+        do
+          sleep 1
+          ((i++))
+        done
+
+        ./where
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: where-rs-${{ matrix.os }}-${{ env.BUILD_NAME }}
+        path: |
+          target/${{ env.BUILD_NAME }}/where
+          target/${{ env.BUILD_NAME }}/whered
